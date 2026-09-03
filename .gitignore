@@ -1,6 +1,7 @@
 /collections
 /indexes
 /runs
+/query-gym/outputs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
