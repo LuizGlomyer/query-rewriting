@@ -93,7 +93,26 @@ def create_reformulator(technique, model):
     return attach_ollama_client(reformulator, model)
 
 
-def print_run_output(results, elapsed_time, technique, model, config):
+def format_elapsed_time(elapsed_time):
+    total_seconds = int(elapsed_time)
+    days, remainder = divmod(total_seconds, 24 * 60 * 60)
+    hours, remainder = divmod(remainder, 60 * 60)
+    minutes, seconds = divmod(remainder, 60)
+
+    parts = []
+    if days:
+        parts.append(f"{days} day{'s' if days != 1 else ''}")
+    if hours:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+    if seconds or not parts:
+        parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+    return ", ".join(parts)
+
+
+def print_run_output(results, elapsed_time, technique, model, iterations, config):
     if results:
         print("\n=== SAMPLE RESULT ===")
         print(f"QID: {results[0].qid}")
@@ -103,18 +122,22 @@ def print_run_output(results, elapsed_time, technique, model, config):
     print("\n=== CONFIGURATION ===")
     print(f"Model: {model}")
     print(f"Technique: {technique}")
+    print(f"Iterations: {iterations}")
     print(f"Parameters: {config['params']}")
     print(f"LLM config: {config['llm_config']}")
 
     print("\n=== TIMING ===")
-    print(f"Total time: {elapsed_time:.2f} seconds")
+    print(f"Total time: {format_elapsed_time(elapsed_time)}")
     if results:
-        print(f"Average: {elapsed_time / len(results):.2f} seconds/query")
+        total_queries = len(results) * iterations
+        print(f"Average: {elapsed_time / total_queries:.2f} seconds/query")
 
 
-def save_results(results, query_path, technique):
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    output_path = OUTPUT_DIR / f"{query_path.stem}-{technique}{query_path.suffix}"
+def save_results(results, query_path, technique, iteration=None):
+    output_dir = OUTPUT_DIR / query_path.stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    suffix = f"_{iteration}" if iteration is not None else ""
+    output_path = output_dir / f"{technique}{suffix}.txt"
     qg.DataLoader.save_queries(
         [qg.QueryItem(r.qid, r.reformulated) for r in results],
         output_path,
@@ -127,6 +150,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Reformulate a query collection.")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="LLM model to use.")
     parser.add_argument(
+        "--iterations",
+        type=int,
+        default=1,
+        help="Number of sequential rewriting passes to run.",
+    )
+    parser.add_argument(
         "--technique",
         default=DEFAULT_TECHNIQUE,
         help="Rewriting technique to use.",
@@ -138,12 +167,15 @@ def parse_args():
         dest="query_path",
         help="Path to the input query/qrel file.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.iterations < 1:
+        parser.error("--iterations must be at least 1")
+    return args
 
 
 def main():
     args = parse_args()
-    queries = qg.load_queries(args.query_path)
+
     config = get_reformulator_config(args.technique)
     effective_config = {
         "params": config["params"],
@@ -152,7 +184,21 @@ def main():
     reformulator = create_reformulator(args.technique, args.model)
 
     start_time = time.perf_counter()
-    results = reformulator.reformulate_batch(queries)
+    results = []
+    for iteration in range(1, args.iterations + 1):
+        print(f"\n=== ITERATION {iteration} ===")
+        queries = qg.load_queries(args.query_path)
+        iteration_start_time = time.perf_counter()
+        results = reformulator.reformulate_batch(queries)
+        iteration_elapsed_time = time.perf_counter() - iteration_start_time
+        print(f"Iteration time: {format_elapsed_time(iteration_elapsed_time)}")
+        save_results(
+            results,
+            args.query_path,
+            args.technique,
+            iteration if args.iterations > 1 else None,
+        )
+        queries = [qg.QueryItem(r.qid, r.reformulated) for r in results]
     elapsed_time = time.perf_counter() - start_time
 
     print_run_output(
@@ -160,10 +206,10 @@ def main():
         elapsed_time,
         args.technique,
         args.model,
+        args.iterations,
         effective_config,
     )
-    save_results(results, args.query_path, args.technique)
-
-
 if __name__ == "__main__":
     main()
+
+# TODO add LAMER and CSQE later

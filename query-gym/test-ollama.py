@@ -10,17 +10,17 @@ response = client.chat(
     [
         {
             "role": "system",
-            "content": "You are a helpful assistant.",
+            "content": "You are a helpful assistant. Answer with text only, no markdown.",
         },
         {
             "role": "user",
             "content": "What is the time complexity of Bubble Sort?",
         },
     ],
-    temperature=0.7,
+    temperature=0,
+    seed=42,
     max_tokens=256,
-    reasoning_effort="high",
+    reasoning_effort="none",
 )
 
-print("=== RESPONSE ===")
 print(repr(response))
