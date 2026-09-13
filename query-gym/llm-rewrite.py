@@ -1,58 +1,10 @@
-# Based on https://github.com/ls3-lab/QueryGym/blob/main/docs/user-guide/methods-reference.md
-
 import argparse
 from pathlib import Path
 import time
 
 import querygym as qg
 from querygym.core.llm import OpenAICompatibleClient
-
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_MODEL = "qwen3.5:9b"
-DEFAULT_TECHNIQUE = "query2doc"
-DEFAULT_QUERY_PATH = SCRIPT_DIR.parent / "topics" / "testqueries.txt"
-OUTPUT_DIR = SCRIPT_DIR / "outputs"
-OLLAMA_LLM_CONFIG = {
-    "base_url": "http://127.0.0.1:11434/v1",
-    "api_key": "ollama",
-    "temperature": 0.7,
-    "max_tokens": 256,
-}
-
-REFORMULATOR_CONFIGS = {
-    "query2doc": {
-        "params": {"mode": "zs"},
-    },
-    "genqr": {
-        "params": {"n_generations": 5},
-    },
-    "genqr_ensemble": {
-        "params": {
-            "repeat_query_weight": 3,
-            "parallel": True,
-        },
-        "llm_config": {"temperature": 0.92},
-    },
-    "qa_expand": {
-        "params": {
-            "temperature_subq": 0.7,
-            "temperature_answer": 0.9,
-            "temperature_refine": 0.6,
-            "max_tokens": 512,
-        },
-    },
-    "mugi": {
-        "params": {
-            "num_docs": 3,
-            "parallel": True,
-            "mode": "zs",
-        },
-    },
-    "query2e": {
-        "params": {"mode": "zs", "max_keywords": 20},
-    },
-}
+from config import *
 
 class OllamaClient(OpenAICompatibleClient):
 
@@ -156,9 +108,11 @@ def parse_args():
         help="Number of sequential rewriting passes to run.",
     )
     parser.add_argument(
-        "--technique",
-        default=DEFAULT_TECHNIQUE,
-        help="Rewriting technique to use.",
+        "--techniques",
+        nargs="+",
+        choices=REFORMULATOR_CONFIGS,
+        default=DEFAULT_TECHNIQUES,
+        help="One or more rewriting techniques to use.",
     )
     parser.add_argument(
         "--qrel-path",
@@ -176,39 +130,42 @@ def parse_args():
 def main():
     args = parse_args()
 
-    config = get_reformulator_config(args.technique)
-    effective_config = {
-        "params": config["params"],
-        "llm_config": {**OLLAMA_LLM_CONFIG, **config.get("llm_config", {})},
-    }
-    reformulator = create_reformulator(args.technique, args.model)
+    for technique in args.techniques:
+        config = get_reformulator_config(technique)
+        effective_config = {
+            "params": config["params"],
+            "llm_config": {**OLLAMA_LLM_CONFIG, **config.get("llm_config", {})},
+        }
+        reformulator = create_reformulator(technique, args.model)
 
-    start_time = time.perf_counter()
-    results = []
-    for iteration in range(1, args.iterations + 1):
-        print(f"\n=== ITERATION {iteration} ===")
-        queries = qg.load_queries(args.query_path)
-        iteration_start_time = time.perf_counter()
-        results = reformulator.reformulate_batch(queries)
-        iteration_elapsed_time = time.perf_counter() - iteration_start_time
-        print(f"Iteration time: {format_elapsed_time(iteration_elapsed_time)}")
-        save_results(
+        start_time = time.perf_counter()
+        results = []
+        for iteration in range(1, args.iterations + 1):
+            # Needs to be reset each iteration because QueryGym changes the query text in place
+            original_queries = qg.load_queries(args.query_path)
+
+            print(f"\n=== {technique.upper()} - ITERATION {iteration} ===")
+            iteration_start_time = time.perf_counter()
+            results = reformulator.reformulate_batch(original_queries)
+            iteration_elapsed_time = time.perf_counter() - iteration_start_time
+            print(f"Iteration time: {format_elapsed_time(iteration_elapsed_time)}")
+            save_results(
+                results,
+                args.query_path,
+                technique,
+                iteration if args.iterations > 1 else None,
+            )
+            
+        elapsed_time = time.perf_counter() - start_time
+
+        print_run_output(
             results,
-            args.query_path,
-            args.technique,
-            iteration if args.iterations > 1 else None,
+            elapsed_time,
+            technique,
+            args.model,
+            args.iterations,
+            effective_config,
         )
-        queries = [qg.QueryItem(r.qid, r.reformulated) for r in results]
-    elapsed_time = time.perf_counter() - start_time
-
-    print_run_output(
-        results,
-        elapsed_time,
-        args.technique,
-        args.model,
-        args.iterations,
-        effective_config,
-    )
 if __name__ == "__main__":
     main()
 
