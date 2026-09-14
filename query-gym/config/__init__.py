@@ -4,7 +4,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "qwen3.5:9b"
 DEFAULT_QUERY_PATH = SCRIPT_DIR.parent / "topics" / "testqueries.txt"
-OUTPUT_DIR = SCRIPT_DIR / "outputs"
+OUTPUT_DIR = SCRIPT_DIR.parent / "topics" / "rewritten"
 OLLAMA_LLM_CONFIG = {
     "base_url": "http://127.0.0.1:11434/v1",
     "api_key": "ollama",
