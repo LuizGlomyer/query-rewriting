@@ -188,6 +188,8 @@ def main():
         args.techniques,
         args.iterations,
     )
+
+
 if __name__ == "__main__":
     main()
 
