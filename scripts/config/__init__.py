@@ -1,6 +1,6 @@
 from pathlib import Path
 
-
+# llm-rewrite.py constants
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "qwen3.5:9b"
 DEFAULT_QUERY_PATH = SCRIPT_DIR.parent / "topics" / "testqueries.txt"
@@ -48,10 +48,24 @@ REFORMULATOR_CONFIGS = {
 
 DEFAULT_TECHNIQUES = list(REFORMULATOR_CONFIGS)
 
+# generate_run.py constants
+DEFAULT_INDEX = "indexes/lucene-index.msmarco-v2-passage"
+DEFAULT_TOPICS_FOLDER = "topics/rewritten/qwen3.5-9b/testqueries"
+DEFAULT_OUTPUT_FOLDER = "runs/rewritten/qwen3.5-9b/testqueries"
+DEFAULT_BATCH_SIZE = 36
+DEFAULT_THREADS = 12
+DEFAULT_HITS = 1000
+
 __all__ = [
+    "DEFAULT_BATCH_SIZE",
+    "DEFAULT_HITS",
+    "DEFAULT_INDEX",
     "DEFAULT_MODEL",
+    "DEFAULT_OUTPUT_FOLDER",
     "DEFAULT_QUERY_PATH",
     "DEFAULT_TECHNIQUES",
+    "DEFAULT_THREADS",
+    "DEFAULT_TOPICS_FOLDER",
     "OLLAMA_LLM_CONFIG",
     "OUTPUT_DIR",
     "REFORMULATOR_CONFIGS",

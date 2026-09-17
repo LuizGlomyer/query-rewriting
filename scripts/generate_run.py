@@ -3,13 +3,9 @@ import subprocess
 import time
 from pathlib import Path
 
+from config import *
+from utils import format_elapsed_time
 
-DEFAULT_INDEX = "indexes/lucene-index.msmarco-v2-passage"
-DEFAULT_TOPICS_FOLDER = "topics/rewritten/qwen3.5-9b/testqueries"
-DEFAULT_OUTPUT_FOLDER = "runs/rewritten/qwen3.5-9b/testqueries"
-DEFAULT_BATCH_SIZE = 36
-DEFAULT_THREADS = 12
-DEFAULT_HITS = 1000
 
 
 def parse_args():
@@ -92,18 +88,21 @@ def main():
             "--bm25",
         ]
 
-        print("*************************")
+        print("*" * 50)
         print(f"Processing {topic_file}")
         started_at = time.perf_counter()
         subprocess.run(command, check=True)
         elapsed = time.perf_counter() - started_at
         print(f"Output written to {output_file}")
-        print(f"Finished in {elapsed:.2f} seconds")
-        print("*************************")
+        print(f"Finished in {format_elapsed_time(elapsed)}")
+        print("*" * 50)
         print()
 
     total_elapsed = time.perf_counter() - total_started_at
-    print(f"Total time for {len(topic_files)} files: {total_elapsed:.2f} seconds")
+    print(
+        f"Total time for {len(topic_files)} files: "
+        f"{format_elapsed_time(total_elapsed)}"
+    )
 
 
 if __name__ == "__main__":
