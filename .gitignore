@@ -1,7 +1,14 @@
-/collections
-/indexes
-/runs
-/topics/rewritten
+/collections/*
+/eval/*
+/indexes/*
+/runs/*
+/topics/*
+
+!/topics/msmarco-v2-passage.dev.txt
+!/topics/msmarco-v2-passage.dev2.txt
+!/topics/testqueries.txt
+# !/runs/msmarco-v2-passage.dev.txt
+# !/runs/msmarco-v2-passage.dev2.txt
 
 .vscode/
 
