@@ -48,6 +48,7 @@ REFORMULATOR_CONFIGS = {
 
 DEFAULT_TECHNIQUES = list(REFORMULATOR_CONFIGS)
 
+
 # generate_run.py constants
 DEFAULT_INDEX = "indexes/lucene-index.msmarco-v2-passage"
 DEFAULT_TOPICS_FOLDER = "topics/qwen3.5-9b/testqueries"
@@ -55,6 +56,21 @@ DEFAULT_OUTPUT_FOLDER = "runs/qwen3.5-9b/testqueries"
 DEFAULT_BATCH_SIZE = 36
 DEFAULT_THREADS = 12
 DEFAULT_HITS = 1000
+
+
+# evaluate.py constants
+DEFAULT_QRELS = "qrels/qrels.msmarco-v2-passage.dev.txt"
+DEFAULT_RUNS_FOLDER = "runs/qwen3.5-9b/testqueries"
+DEFAULT_EVAL_FOLDER = "eval/qwen3.5-9b/testqueries"
+
+EVAL_METRICS = [
+    "map_cut.100",
+    "recip_rank",
+    "recall.100,1000",
+    "ndcg_cut.10",
+    "P.10,100",
+]
+
 
 __all__ = [
     "DEFAULT_BATCH_SIZE",
@@ -65,9 +81,12 @@ __all__ = [
     "DEFAULT_QUERY_PATH",
     "DEFAULT_TECHNIQUES",
     "DEFAULT_THREADS",
-    "DEFAULT_TOPICS_FOLDER",
     "OLLAMA_LLM_CONFIG",
     "OUTPUT_DIR",
     "REFORMULATOR_CONFIGS",
     "SCRIPT_DIR",
+    "DEFAULT_EVAL_FOLDER",
+    "DEFAULT_QRELS",
+    "DEFAULT_RUNS_FOLDER",
+    "EVAL_METRICS",
 ]
