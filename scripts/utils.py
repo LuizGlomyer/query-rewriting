@@ -1,3 +1,22 @@
+from pathlib import Path
+
+
+def derive_mapped_folder(path, source_name, target_name):
+    path = Path(path)
+    path_parts = list(path.parts)
+    source_index = path_parts.index(source_name)
+    mapped_parts = (
+        path_parts[:source_index]
+        + [target_name]
+        + path_parts[source_index + 1:]
+    )
+
+    if path.is_file():
+        mapped_parts.pop()
+
+    return Path(*mapped_parts)
+
+
 def format_elapsed_time(elapsed_time):
     total_seconds = int(elapsed_time)
     days, remainder = divmod(total_seconds, 24 * 60 * 60)

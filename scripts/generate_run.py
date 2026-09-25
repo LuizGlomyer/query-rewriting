@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from config import *
-from utils import format_elapsed_time
+from utils import derive_mapped_folder, format_elapsed_time
 
 
 
@@ -20,15 +20,15 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--topics-folder",
+        "--topics-path",
         default=DEFAULT_TOPICS_FOLDER,
-        help=f"Folder containing topics/query files (default: {DEFAULT_TOPICS_FOLDER})",
+        help=f"Path containing topics/query files (default: {DEFAULT_TOPICS_FOLDER})",
     )
 
     parser.add_argument(
         "--output-folder",
-        default=DEFAULT_OUTPUT_FOLDER,
-        help=f"Folder for output run files (default: {DEFAULT_OUTPUT_FOLDER})",
+        default=None,
+        help="Folder for output run files (derived from --topics-path by default)",
     )
 
     parser.add_argument(
@@ -57,12 +57,24 @@ def parse_args():
 
 def main():
     args = parse_args()
-    topics_folder = Path(args.topics_folder)
-    output_folder = Path(args.output_folder)
-    topic_files = sorted(path for path in topics_folder.iterdir() if path.is_file())
+    topics_path = Path(args.topics_path)
+
+    if not topics_path.exists():
+        raise FileNotFoundError(f"Topics path not found: {topics_path}")
+
+    if topics_path.is_file():
+        topic_files = [topics_path]
+    else:
+        topic_files = sorted(path for path in topics_path.iterdir() if path.is_file())
+
+    output_folder = (
+        Path(args.output_folder)
+        if args.output_folder
+        else derive_mapped_folder(topics_path, "topics", "runs")
+    )
 
     if not topic_files:
-        raise FileNotFoundError(f"No topic files found in {topics_folder}")
+        raise FileNotFoundError(f"No topic files found in {topics_path}")
 
     output_folder.mkdir(parents=True, exist_ok=True)
     total_started_at = time.perf_counter()

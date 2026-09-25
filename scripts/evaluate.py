@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from config import *
-from utils import format_elapsed_time
+from utils import derive_mapped_folder, format_elapsed_time
 
 
 def parse_args():
@@ -21,15 +21,15 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--runs-folder",
+        "--runs-path",
         default=DEFAULT_RUNS_FOLDER,
-        help=f"Folder containing run files (default: {DEFAULT_RUNS_FOLDER})",
+        help=f"Path containing run files (default: {DEFAULT_RUNS_FOLDER})",
     )
 
     parser.add_argument(
         "--eval-folder",
-        default=DEFAULT_EVAL_FOLDER,
-        help=f"Folder for evaluation results (default: {DEFAULT_EVAL_FOLDER})",
+        default=None,
+        help="Folder for evaluation results (derived from --runs-path by default)",
     )
 
     return parser.parse_args()
@@ -193,28 +193,32 @@ def main():
     args = parse_args()
 
     qrels = Path(args.qrels)
-    runs_folder = Path(args.runs_folder)
-    eval_folder = Path(args.eval_folder)
+    runs_path = Path(args.runs_path)
 
     if not qrels.is_file():
         raise FileNotFoundError(
             f"Qrels file not found: {qrels}"
         )
 
-    if not runs_folder.is_dir():
-        raise FileNotFoundError(
-            f"Runs folder not found: {runs_folder}"
-        )
+    if not runs_path.exists():
+        raise FileNotFoundError(f"Runs path not found: {runs_path}")
 
-    run_files = sorted(
-        path
-        for path in runs_folder.rglob("*")
-        if path.is_file()
+    eval_folder = (
+        Path(args.eval_folder)
+        if args.eval_folder
+        else derive_mapped_folder(runs_path, "runs", "eval")
     )
+
+    if runs_path.is_file():
+        runs_folder = runs_path.parent
+        run_files = [runs_path]
+    else:
+        runs_folder = runs_path
+        run_files = sorted(path for path in runs_folder.rglob("*") if path.is_file())
 
     if not run_files:
         raise FileNotFoundError(
-            f"No run files found in {runs_folder}"
+            f"No run files found in {runs_path}"
         )
 
     total_started_at = time.perf_counter()
