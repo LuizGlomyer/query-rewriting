@@ -33,8 +33,10 @@ to Ollama.
   repository.
 
 The rewrite, run, and evaluation scripts preserve the relevant input path
-structure. For example, rewriting `topics/testqueries.txt` with model
-`qwen3.5:9b` and technique `mugi` creates
+structure. The small `topics/baseline/testqueries.txt` file contains only the
+first five lines of `topics/baseline/msmarco-v2-passage.dev.txt`; use it for
+quick tests. For example, rewriting this file with model `qwen3.5:9b` and
+technique `mugi` creates
 `topics/qwen3.5-9b/testqueries/mugi.txt`; the colon in the model name is
 replaced with a hyphen in the folder name.
 
@@ -73,17 +75,16 @@ model is available before running it. Example:
 
 ```bash
 python scripts/llm-rewrite.py \
-  --qrel-path topics/testqueries.txt \
+  --topic-path topics/baseline/testqueries.txt \
   --model qwen3.5:9b \
   --techniques mugi \
   --iterations 1
 ```
 
-Despite its name, `--qrel-path` is the **input query file**, not a qrels file.
 The available techniques are `query2doc`, `genqr`, `genqr_ensemble`,
 `qa_expand`, `mugi`, and `query2e`. If `--techniques` is omitted, all six
 configured techniques run. The default model is `qwen3.5:9b`, the default input
-is `topics/testqueries.txt`, and the default iteration count is `1`.
+is `topics/baseline/testqueries.txt`, and the default iteration count is `1`.
 
 With the example above, output is saved as
 `topics/qwen3.5-9b/testqueries/mugi.txt`. With more than one iteration, files
@@ -93,7 +94,8 @@ previous iteration's rewritten output.
 
 Accepted options:
 
-- `--qrel-path PATH`: input query file (default: `topics/testqueries.txt`).
+- `--topic-path PATH`: input topic/query file (default:
+  `topics/baseline/testqueries.txt`).
 - `--model NAME`: Ollama model name (default: `qwen3.5:9b`).
 - `--techniques TECHNIQUE [TECHNIQUE ...]`: one or more configured methods
   (default: all configured methods).
@@ -148,15 +150,17 @@ under a run directory against qrels, and writes aggregated and per-query CSVs:
 
 ```bash
 python scripts/evaluate.py \
-  --qrels qrels/qrels.msmarco-v2-passage.dev.txt \
+  --qrels qrels/msmarco-v2-passage.dev.txt \
   --runs-path runs/qwen3.5-9b/testqueries
 ```
 
-The default qrels file is `qrels/qrels.msmarco-v2-passage.dev.txt`; the
+The default qrels file is `qrels/msmarco-v2-passage.dev.txt`; the
 default run directory is `runs/qwen3.5-9b/testqueries`. Unless
 `--eval-folder` is set, output mirrors the run path under `eval/`. The example
 creates files under `eval/aggregated/qwen3.5-9b/testqueries/` and
-`eval/detailed/qwen3.5-9b/testqueries/`.
+`eval/detailed/qwen3.5-9b/testqueries/`. For the dev2 baseline, pair
+`topics/baseline/msmarco-v2-passage.dev2.txt` with
+`qrels/msmarco-v2-passage.dev2.txt`.
 
 The configured metrics are `map_cut.100`, `recip_rank`, `recall.100,1000`,
 `ndcg_cut.10`, and `P.10,100`. Aggregated CSVs contain metric/value pairs;
@@ -166,7 +170,7 @@ detailed CSVs contain one row per query ID. Evaluation is performed by
 Accepted options:
 
 - `--qrels PATH`: relevance judgments (default:
-  `qrels/qrels.msmarco-v2-passage.dev.txt`).
+  `qrels/msmarco-v2-passage.dev.txt`).
 - `--runs-path PATH`: one run file or a directory of run files (default:
   `runs/qwen3.5-9b/testqueries`).
 - `--eval-folder PATH`: evaluation output root (default: derived by replacing

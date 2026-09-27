@@ -4,9 +4,8 @@
 /runs/*
 /topics/*
 
-!/topics/msmarco-v2-passage.dev.txt
-!/topics/msmarco-v2-passage.dev2.txt
-!/topics/testqueries.txt
+!/topics/baseline/
+!/topics/baseline/*.txt
 # !/runs/msmarco-v2-passage.dev.txt
 # !/runs/msmarco-v2-passage.dev2.txt
 

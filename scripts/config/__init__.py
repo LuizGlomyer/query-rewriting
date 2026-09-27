@@ -3,7 +3,7 @@ from pathlib import Path
 # llm-rewrite.py constants
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "qwen3.5:9b"
-DEFAULT_QUERY_PATH = SCRIPT_DIR.parent / "topics" / "testqueries.txt"
+DEFAULT_TOPIC_PATH = SCRIPT_DIR.parent / "topics" / "baseline" / "testqueries.txt"
 OUTPUT_DIR = SCRIPT_DIR.parent / "topics"
 OLLAMA_LLM_CONFIG = {
     "base_url": "http://127.0.0.1:11434/v1",
@@ -59,7 +59,7 @@ DEFAULT_HITS = 1000
 
 
 # evaluate.py constants
-DEFAULT_QRELS = PROJECT_DIR / "qrels" / "qrels.msmarco-v2-passage.dev.txt"
+DEFAULT_QRELS = PROJECT_DIR / "qrels" / "msmarco-v2-passage.dev.txt"
 DEFAULT_RUNS_FOLDER = PROJECT_DIR / "runs" / "qwen3.5-9b" / "testqueries"
 
 EVAL_METRICS = [
@@ -76,7 +76,7 @@ __all__ = [
     "DEFAULT_HITS",
     "DEFAULT_INDEX",
     "DEFAULT_MODEL",
-    "DEFAULT_QUERY_PATH",
+    "DEFAULT_TOPIC_PATH",
     "DEFAULT_TECHNIQUES",
     "DEFAULT_THREADS",
     "DEFAULT_TOPICS_FOLDER",

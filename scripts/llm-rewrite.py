@@ -80,8 +80,8 @@ def safe_path_component(value):
     return re.sub(r'[<>:"/\\|?*]', "-", value).strip(" .")
 
 
-def save_results(results, query_path, technique, model, iteration=None):
-    output_dir = OUTPUT_DIR / safe_path_component(model) / query_path.stem
+def save_results(results, topic_path, technique, model, iteration=None):
+    output_dir = OUTPUT_DIR / safe_path_component(model) / topic_path.stem
     output_dir.mkdir(parents=True, exist_ok=True)
     suffix = f"_{iteration}" if iteration is not None else ""
     output_path = output_dir / f"{technique}{suffix}.txt"
@@ -110,11 +110,11 @@ def parse_args():
         help="One or more rewriting techniques to use.",
     )
     parser.add_argument(
-        "--qrel-path",
+        "--topic-path",
         type=Path,
-        default=DEFAULT_QUERY_PATH,
-        dest="query_path",
-        help="Path to the input query/qrel file.",
+        default=DEFAULT_TOPIC_PATH,
+        dest="topic_path",
+        help="Path to the input topic/query file.",
     )
     args = parser.parse_args()
     if args.iterations < 1:
@@ -140,7 +140,7 @@ def main():
             print(f"\n***** {technique.upper()} - ITERATION {iteration} *****")
             iteration_start_time = time.perf_counter()
             # Needs to be reset each iteration because QueryGym changes the query text in place
-            original_queries = qg.load_queries(args.query_path)
+            original_queries = qg.load_queries(args.topic_path)
 
             results = reformulator.reformulate_batch(original_queries)
             iteration_elapsed_time = time.perf_counter() - iteration_start_time
@@ -148,7 +148,7 @@ def main():
             print(f"Iteration time: {format_elapsed_time(iteration_elapsed_time)}")
             save_results(
                 results,
-                args.query_path,
+                args.topic_path,
                 technique,
                 args.model,
                 iteration if args.iterations > 1 else None,
