@@ -64,8 +64,10 @@ def main():
 
     if topics_path.is_file():
         topic_files = [topics_path]
+        topics_root = topics_path.parent
     else:
-        topic_files = sorted(path for path in topics_path.iterdir() if path.is_file())
+        topic_files = sorted(path for path in topics_path.rglob("*") if path.is_file())
+        topics_root = topics_path
 
     output_folder = (
         Path(args.output_folder)
@@ -80,7 +82,8 @@ def main():
     total_started_at = time.perf_counter()
 
     for topic_file in topic_files:
-        output_file = output_folder / topic_file.name
+        output_file = output_folder / topic_file.relative_to(topics_root)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         command = [
             "python",
             "-m",
