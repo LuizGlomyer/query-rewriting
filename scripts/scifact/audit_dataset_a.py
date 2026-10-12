@@ -8,7 +8,7 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 PROCESSED = ROOT / "collections" / "scifact" / "processed"
 
 INPUT_PATH = PROCESSED / "dataset_a_inputs.jsonl"

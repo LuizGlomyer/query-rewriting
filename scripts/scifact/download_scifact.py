@@ -12,7 +12,7 @@ URL = (
     "thakur/BEIR/datasets/scifact.zip"
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "collections" / "scifact"
 ZIP_PATH = DATA_DIR / "scifact.zip"
 RAW_DIR = DATA_DIR / "raw"

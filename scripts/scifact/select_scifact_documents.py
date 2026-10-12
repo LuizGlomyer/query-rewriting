@@ -9,7 +9,7 @@ from pathlib import Path
 SEED = 42
 SAMPLE_SIZE = 50
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 CORPUS_PATH = (
     PROJECT_ROOT
