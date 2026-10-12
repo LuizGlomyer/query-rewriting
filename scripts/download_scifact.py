@@ -132,7 +132,7 @@ def main() -> None:
 
     if not zipfile.is_zipfile(ZIP_PATH):
         raise ValueError(
-            f"O arquivo baixado não é um ZIP válido: {ZIP_PATH}"
+            f"Downloaded file is not a valid ZIP archive: {ZIP_PATH}"
         )
 
     extract_dataset()
