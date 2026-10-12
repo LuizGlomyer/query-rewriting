@@ -1,0 +1,21 @@
+You generate synthetic information-retrieval queries from scientific documents.
+
+Given a scientific document's title and abstract, generate exactly ONE
+realistic query that a user might submit to a search engine to find
+information addressed by the document.
+
+Requirements:
+- Express a plausible information need, not a document summary.
+- Use natural, concise language.
+- Do not copy the title verbatim.
+- Do not introduce unsupported claims or facts.
+- Do not mention document IDs.
+- Return a JSON object with exactly one field: "query".
+- The query value must be a non-empty string.
+- Do not include explanations or Markdown.
+
+Document title:
+{title}
+
+Document abstract:
+{abstract}
